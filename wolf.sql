@@ -1,13 +1,3 @@
-
--- phpMyAdmin SQL Dump
--- version 4.2.10
--- http://www.phpmyadmin.net
---
--- Host: localhost
--- Generation Time: May 20, 2015 at 09:45 AM
--- Server version: 5.5.38
--- PHP Version: 5.6.2
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
@@ -20,11 +10,24 @@ USE `Wolf`;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `Match`
+--
+
+CREATE TABLE `Match` (
+  `match_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `mapname` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
+  `created_on` datetime NOT NULL,
+  PRIMARY KEY (`match_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Stats`
 --
 
 CREATE TABLE `Stats` (
-  `game_id` int(10) unsigned NOT NULL,
+  `match_id` int(10) unsigned NOT NULL,
   `client_uuid` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
   `client_name` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
   `player_num` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
