@@ -1,5 +1,28 @@
 import csv
 from sqlalchemy import create_engine, Table, MetaData
+from ConfigParser import ConfigParser
+from argparse import ArgumentParser
+
+
+def get_config(path):
+    cparser = ConfigParser()
+    cparser.read(path)
+    return cparser
+
+
+def connect_db(cparser):
+    user = cparser.get('mysql', 'user')
+    pwd = cparser.get('mysql', 'pwd')
+    host = cparser.get('mysql', 'host')
+    port = cparser.getint('mysql', 'port')
+    dbname = cparser.get('mysql', 'dbname')
+    engine = create_engine("mysql://{}:{}@{}:{}/{}".format(user,
+                                                           pwd,
+                                                           host,
+                                                           port,
+                                                           dbname))
+    meta = MetaData()
+    return engine, meta
 
 
 class ETLegacyParser(object):
@@ -7,20 +30,10 @@ class ETLegacyParser(object):
     def __init__(self, fp):
         self.fp = fp
 
-    def process(self):
-        # TODO: This needs to be read from config
-        user = "root"
-        pwd = "root"
-        host = "127.0.0.1"
-        port = 3306
-        dbname = "Wolf"
-        engine = create_engine("mysql://{}:{}@{}:{}/{}".format(user, pwd, host, port, dbname))
-        meta = MetaData()
+    def process(self, engine, meta):
         player_stats = Table('Stats', meta, autoload=True, autoload_with=engine)
         match = Table('Match', meta, autoload=True, autoload_with=engine)
-        if match is None:
-            print "FUCKED"
-            return
+        deaths = Table('Deaths', meta, autoload=True, autoload_with=engine)
         with open(self.fp, 'r') as f:
             reader = csv.reader(f, delimiter=',', quotechar='`')
             i = iter(reader)
@@ -32,7 +45,12 @@ class ETLegacyParser(object):
                 if len(line) > 3:
                     break
                 killer, victim, weapon = line
-                print killer, victim, weapon
+                sql = deaths.insert().values({'match_id': match_id,
+                                              'killer': killer,
+                                              'victim': victim,
+                                              'weapon': weapon})
+                with engine.connect() as connection:
+                    connection.execute(sql)
             for line in i:
                 a = PlayerStats(line)
                 with engine.connect() as connection:
@@ -206,3 +224,16 @@ class PlayerStats(object):
         values = dict(zip(self.MAPPER, self.line))
         values['match_id'] = match_id
         return tbl.insert().values(**values)
+
+
+if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser.add_argument("-f", "--file", help="CSV filepath to parse",
+                        required=True)
+    parser.add_argument("-c", "--config", help="path for config ini file",
+                        required=True)
+    args = parser.parse_args()
+    cparser = get_config(args.config)
+    engine, meta = connect_db(cparser)
+    etp = ETLegacyParser(args.file)
+    etp.process(engine, meta)
