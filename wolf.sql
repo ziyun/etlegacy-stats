@@ -10,14 +10,26 @@ USE `Wolf`;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `Deaths`
+--
+
+CREATE TABLE `Deaths` (
+  `match_id` int(10) unsigned NOT NULL,
+  `killer` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
+  `victim` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
+  `weapon` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Match`
 --
 
 CREATE TABLE `Match` (
-  `match_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+`match_id` int(10) unsigned NOT NULL,
   `mapname` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
-  `created_on` datetime NOT NULL,
-  PRIMARY KEY (`match_id`)
+  `created_on` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -169,3 +181,31 @@ CREATE TABLE `Stats` (
   `heavyweapons` int(11) NOT NULL,
   `covertops` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `Deaths`
+--
+ALTER TABLE `Deaths`
+ ADD KEY `match_id` (`match_id`);
+
+--
+-- Indexes for table `Match`
+--
+ALTER TABLE `Match`
+ ADD PRIMARY KEY (`match_id`), ADD KEY `created_on` (`created_on`);
+
+--
+-- Indexes for table `Stats`
+--
+ALTER TABLE `Stats`
+ ADD KEY `match_id` (`match_id`);
+
+--
+-- AUTO_INCREMENT for table `Match`
+--
+ALTER TABLE `Match`
+MODIFY `match_id` int(10) unsigned NOT NULL AUTO_INCREMENT;
